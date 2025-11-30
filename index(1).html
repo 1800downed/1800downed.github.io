@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PrivateCycle - Periods are private, your data should be too.">
+    <meta name="theme-color" content="#8B5A8E">
+    <title>PrivateCycle - Private Period Tracker</title>
+    <style>
+        /* DESIGN SYSTEM CSS VARIABLES */
+        :root {
+            --primary: #8B5A8E;
+            --primary-light: #A66FA6;
+            --primary-dark: #6B3A6B;
+            --accent-period: #E8586A;
+            --accent-predict: #F0A76D;
+            --accent-fertile: #5AB475;
+            --accent-ovulation: #FFB6D9;
+            --bg-light: #F5F3F7;
+            --bg-white: #FFFFFF;
+            --text-dark: #2D2D2D;
+            --text-gray: #666666;
+            --text-light: #999999;
+            --border: #E0E0E0;
+            --error: #D32F2F;
+            --success: #388E3C;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.2);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        /* DARK MODE DEFAULTS */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-light: #121212;
+                --bg-white: #1E1E1E;
+                --text-dark: #E0E0E0;
+                --text-gray: #B0B0B0;
+                --text-light: #808080;
+                --border: #333333;
+                --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+                --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+                --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        /* LIGHT MODE OVERRIDES */
+        .light-theme {
+            --bg-light: #F5F3F7;
+            --bg-white: #FFFFFF;
+            --text-dark: #2D2D2D;
+            --text-gray: #666666;
+            --text-light: #999999;
+            --border: #E0E0E0;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+            --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-buttons button.active {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 4px 12px rgba(139, 90, 142, 0.3) !important;
+        }
+
+        .nav-buttons button.active:hover {
+            background: var(--primary-light) !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* BASE STYLES */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: var(--bg-light); color: var(--text-dark); line-height: 1.6; }
+        body { display: flex; flex-direction: column; }
+
+        /* LAYOUT STRUCTURE */
+        #app-container { display: flex; flex-direction: column; height: 100%; width: 100%; }
+        .screen { display: none; flex: 1; overflow-y: auto; animation: fadeIn 0.3s ease-in-out; }
+        .screen.active { display: flex; flex-direction: column; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* PIN Lock Screen */
+        #lockScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-light);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-lg);
+            padding: var(--spacing-lg);
+        }
+        #lockScreen.hidden { display: none; }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: var(--spacing-lg) var(--spacing-md);
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: var(--spacing-md);
+        }
+        .header h1 { font-size: 1.5rem; font-weight: 600; margin: 0; }
+        .header-subtitle { font-size: 0.85rem; opacity: 0.95; font-weight: 400; }
+        .nav-buttons { display: flex; gap: var(--spacing-sm); flex-wrap: wrap; }
+
+        /* MAIN CONTENT */
+        .content { flex: 1; overflow-y: auto; padding: var(--spacing-lg) var(--spacing-md); max-width: 900px; margin: 0 auto; width: 100%; }
+
+        /* BUTTONS */
+        button { padding: var(--spacing-sm) var(--spacing-md); border: none; border-radius: var(--radius); font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: var(--spacing-xs); }
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        button:active:not(:disabled) { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-light); }
+        .btn-secondary { background: var(--bg-white); color: var(--primary); border: 2px solid var(--primary); }
+        .btn-secondary:hover:not(:disabled) { background: var(--bg-light); }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-danger:hover:not(:disabled) { background: #B71C1C; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover:not(:disabled) { background: #2E7D32; }
+        .btn-sm { padding: var(--spacing-xs) var(--spacing-sm); font-size: 0.85rem; }
+        .btn-full-width { width: 100%; justify-content: center; }
+
+        /* FORMS & INPUTS */
+        .form-group { margin-bottom: var(--spacing-lg); display: flex; flex-direction: column; gap: var(--spacing-sm); }
+        label { font-weight: 500; color: var(--text-dark); font-size: 0.95rem; }
+        input[type="text"], input[type="date"], input[type="number"], input[type="password"], textarea, select {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 90, 142, 0.1); }
+        textarea { resize: vertical; min-height: 100px; }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+
+        /* TOGGLE SWITCH */
+        .toggle-switch { display: flex; align-items: center; gap: var(--spacing-md); justify-content: space-between; }
+        .toggle-switch input[type="checkbox"] {
+            appearance: none;
+            width: 50px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s ease;
+            border: none;
+        }
+        .toggle-switch input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 12px;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .toggle-switch input[type="checkbox"]:checked { background: var(--primary); }
+        .toggle-switch input[type="checkbox"]:checked::after { left: 24px; }
+
+        /* CARDS & CONTAINERS */
+        .card { background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg); box-shadow: var(--shadow-sm); margin-bottom: var(--spacing-lg); border: 1px solid var(--border); }
+        .card-header { font-size: 1.1rem; font-weight: 600; margin-bottom: var(--spacing-md); color: var(--text-dark); }
+        .card-subtitle { font-size: 0.85rem; color: var(--text-gray); margin-top: var(--spacing-xs); }
+        .card-stat { text-align: center; padding: var(--spacing-md); background: var(--bg-light); border-radius: var(--radius); }
+        .card-stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .card-stat-label { font-size: 0.85rem; color: var(--text-gray); margin-top: var(--spacing-xs); }
+
+        /* GRID LAYOUTS */
+        .grid { display: grid; gap: var(--spacing-md); }
+        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+
+        /* CALENDAR STYLES */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg); gap: var(--spacing-md); }
+        .calendar-month-title { font-size: 1.3rem; font-weight: 600; text-align: center; flex: 1; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--spacing-sm); margin-bottom: var(--spacing-lg); }
+        .calendar-day-header { text-align: center; font-weight: 600; color: var(--text-gray); padding: var(--spacing-sm); font-size: 0.85rem; }
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            cursor: pointer;
+            position: relative;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            background: var(--bg-white);
+            font-size: 0.9rem;
+        }
+        .calendar-day:hover:not(.empty) { border-color: var(--primary); transform: scale(1.05); }
+        .calendar-day.empty { color: var(--text-light); cursor: default; background: transparent; }
+        .calendar-day.period { background: rgba(232, 88, 106, 0.15); color: var(--accent-period); font-weight: 600; }
+        .calendar-day.predicted { background: rgba(240, 167, 109, 0.15); border: 2px solid var(--accent-predict); }
+        .calendar-day.fertile { background: rgba(90, 180, 117, 0.15); }
+        .calendar-day.ovulation { background: rgba(255, 182, 217, 0.3); border: 2px solid var(--accent-ovulation); }
+
+        /* LISTS */
+        .list { display: flex; flex-direction: column; gap: var(--spacing-sm); }
+        .list-item { background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--spacing-md); display: flex; justify-content: space-between; align-items: center; gap: var(--spacing-md); transition: all 0.2s ease; }
+        .list-item:hover { box-shadow: var(--shadow-sm); border-color: var(--primary); }
+        .list-item-main { flex: 1; }
+        .list-item-title { font-weight: 600; color: var(--text-dark); margin-bottom: var(--spacing-xs); }
+        .list-item-subtitle { font-size: 0.85rem; color: var(--text-gray); }
+
+        /* MODALS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: var(--spacing-md); }
+        .modal-overlay.hidden { display: none; }
+        .modal-content { background: var(--bg-white); border-radius: var(--radius-lg); padding: var(--spacing-lg); max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header { font-size: 1.3rem; font-weight: 600; margin-bottom: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-gray); padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+        .modal-close:hover { color: var(--text-dark); }
+        .modal-footer { display: flex; gap: var(--spacing-md); margin-top: var(--spacing-lg); flex-wrap: wrap; }
+
+        /* ALERTS */
+        .alert { padding: var(--spacing-md); border-radius: var(--radius); margin-bottom: var(--spacing-lg); display: flex; gap: var(--spacing-md); align-items: flex-start; }
+        .alert-icon { flex-shrink: 0; font-size: 1.3rem; }
+        .alert-success { background: rgba(56, 142, 60, 0.1); color: var(--success); border: 1px solid rgba(56, 142, 60, 0.3); }
+        .alert-error { background: rgba(211, 47, 47, 0.1); color: var(--error); border: 1px solid rgba(211, 47, 47, 0.3); }
+        .alert-info { background: rgba(139, 90, 142, 0.1); color: var(--primary); border: 1px solid rgba(139, 90, 142, 0.3); }
+
+        /* PIN INPUT */
+        .pin-input-container { display: flex; gap: var(--spacing-md); justify-content: center; margin: var(--spacing-lg) 0; }
+        .pin-digit { width: 50px; height: 50px; border: 2px solid var(--border); border-radius: var(--radius); text-align: center; font-size: 1.5rem; font-weight: 600; color: var(--text-dark); letter-spacing: 0.2em; transition: all 0.2s ease; }
+        .pin-digit:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(139, 90, 142, 0.1); }
+        .pin-digit.filled { border-color: var(--primary); background: rgba(139, 90, 142, 0.05); }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .content { padding: var(--spacing-md); }
+            .header { padding: var(--spacing-md); }
+            .header h1 { font-size: 1.2rem; }
+            .card { padding: var(--spacing-md); }
+            .grid-2 { grid-template-columns: 1fr; }
+            .modal-content { max-width: 95%; }
+        }
+
+        /* UTILITY CLASSES */
+        .hidden { display: none !important; }
+        .mt { margin-top: var(--spacing-lg); }
+        .mb { margin-bottom: var(--spacing-lg); }
+        .gap { gap: var(--spacing-lg); }
+
+        /* ONBOARDING */
+        .onboarding-container { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--spacing-lg); max-width: 500px; margin: 0 auto; padding: var(--spacing-xl) var(--spacing-md); text-align: center; }
+        .onboarding-title { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .onboarding-subtitle { font-size: 1rem; color: var(--text-gray); line-height: 1.8; }
+        .privacy-features { background: var(--bg-light); border-radius: var(--radius-lg); padding: var(--spacing-lg); text-align: left; margin: var(--spacing-lg) 0; }
+        .privacy-features li { margin-bottom: var(--spacing-md); display: flex; gap: var(--spacing-md); align-items: flex-start; }
+        .privacy-features li::before { content: '✓'; color: var(--success); font-weight: 600; flex-shrink: 0; font-size: 1.2rem; }
+
+        /* DASHBOARD */
+        .prediction-panel { background: linear-gradient(135deg, rgba(139, 90, 142, 0.1) 0%, rgba(240, 167, 109, 0.1) 100%); border-left: 4px solid var(--primary); padding: var(--spacing-md); border-radius: var(--radius); margin-bottom: var(--spacing-lg); }
+        .prediction-panel-title { font-weight: 600; color: var(--primary); font-size: 0.9rem; margin-bottom: var(--spacing-xs); }
+        .prediction-panel-value { font-size: 1.3rem; font-weight: 700; color: var(--text-dark); margin-bottom: var(--spacing-xs); }
+        .prediction-panel-subtitle { font-size: 0.85rem; color: var(--text-gray); }
+
+        /* EMPTY STATE */
+        .empty-state { text-align: center; padding: var(--spacing-xl); color: var(--text-gray); }
+        .empty-state-title { font-weight: 600; margin-bottom: var(--spacing-sm); color: var(--text-dark); }
+
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <!-- LOCK SCREEN PIN Protection -->
+        <div id="lockScreen">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">❣️</div>
+                <h2 style="color: var(--primary); margin-bottom: 5px;">PrivateCycle</h2>
+                <p style="color: var(--text-gray);">Enter your PIN to continue</p>
+            </div>
+            <div class="pin-input-container" id="pinInputContainer">
+                <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" aria-label="PIN digit 1">
+                <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" aria-label="PIN digit 2">
+                <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" aria-label="PIN digit 3">
+                <input type="password" class="pin-digit" maxlength="1" inputmode="numeric" aria-label="PIN digit 4">
+            </div>
+            <div id="pinError" style="color: var(--error); font-size: 0.9rem; min-height: 20px; text-align: center;"></div>
+            <button class="btn-secondary btn-sm" id="forgotPinBtn" style="margin-top: 10px;">Forgot PIN? Clear Data</button>
+        </div>
+
+        <!-- MAIN APP HEADER -->
+        <div class="header" id="headerContainer">
+            <div>
+                <h1>PrivateCycle</h1>
+                <div class="header-subtitle" id="headerSubtitle">Periods are private, your data should be too.</div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn-secondary btn-sm" id="btnHome" onclick="app.showScreen('home')">Home</button>
+                <button class="btn-secondary btn-sm" id="btnCalendar" onclick="app.showScreen('calendar')">Calendar</button>
+                <button class="btn-secondary btn-sm" id="btnHistory" onclick="app.showScreen('history')">History</button>
+                <button class="btn-secondary btn-sm" id="btnSettings" onclick="app.showScreen('settings')">Settings</button>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: ONBOARDING -->
+        <div class="screen" id="onboardingScreen">
+            <div class="content">
+                <div class="onboarding-container">
+                    <h1 class="onboarding-title">Welcome to PrivateCycle</h1>
+                    <p class="onboarding-subtitle">Track your menstrual cycle with complete privacy. Your data never leaves this device.</p>
+                    <div class="privacy-features">
+                        <strong style="display: block; margin-bottom: 10px;">Your Privacy Promise</strong>
+                        <ul style="list-style: none; padding: 0;">
+                            <li>No account required</li>
+                            <li>No cloud storage or sync</li>
+                            <li>No analytics or tracking</li>
+                            <li>No ads or third-party data sharing</li>
+                            <li>Optional PIN lock for security</li>
+                            <li>Encrypted local backups available</li>
+                        </ul>
+                    </div>
+                    <div class="form-group" style="width: 100%;">
+                        <label for="onboardingName">What should we call you? (optional)</label>
+                        <input type="text" id="onboardingName" placeholder="e.g., Sarah" style="text-align: center;">
+                        <div class="card-subtitle" style="text-align: center; margin: 0;">Leave blank to use "User"</div>
+                    </div>
+                    <button class="btn-primary btn-full-width" onclick="app.completeOnboarding()">Start Tracking</button>
+                    <button class="btn-secondary btn-full-width" onclick="document.getElementById('aboutModal').classList.remove('hidden')">Learn More</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: HOME DASHBOARD -->
+        <div class="screen" id="homeScreen">
+            <div class="content">
+                <div id="homeGreeting" class="card-header" style="margin-bottom: var(--spacing-lg);">Hi User!</div>
+                <button class="btn-primary btn-full-width" onclick="app.showModal('addPeriodModal')" style="margin-bottom: var(--spacing-lg);">Add Period Start</button>
+                
+                <div id="predictionPanel" class="prediction-panel">
+                    <div class="prediction-panel-title">Next Period Prediction</div>
+                    <div class="prediction-panel-value" id="predictionDate"></div>
+                    <div class="prediction-panel-subtitle" id="predictionInfo">Log at least 2 periods to see predictions</div>
+                </div>
+
+                <div id="fertileWindowPanel" class="prediction-panel" style="border-left-color: var(--accent-fertile); display: none;">
+                    <div class="prediction-panel-title">❣️ Fertile Window (Trying to Conceive)</div>
+                    <div class="prediction-panel-value" id="fertileWindowDate"></div>
+                    <div class="prediction-panel-subtitle" id="fertileWindowInfo">Based on ovulation calculations</div>
+                </div>
+
+                <div class="grid grid-3" style="margin-bottom: var(--spacing-lg);">
+                    <div class="card-stat">
+                        <div class="card-stat-value" id="totalPeriodsCount">0</div>
+                        <div class="card-stat-label">Periods Logged</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value" id="avgCycleLength"></div>
+                        <div class="card-stat-label">Avg Cycle</div>
+                    </div>
+                    <div class="card-stat">
+                        <div class="card-stat-value" id="lastPeriodDaysAgo"></div>
+                        <div class="card-stat-label">Days Since</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Recent Periods</div>
+                    <div id="recentPeriodsList" class="list">
+                        <div class="empty-state-text">No periods logged yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: CALENDAR -->
+        <div class="screen" id="calendarScreen">
+            <div class="content">
+                <div class="card">
+                    <div class="calendar-header">
+                        <button class="btn-secondary btn-sm" id="prevMonthBtn" onclick="app.calendar.prevMonth()">Prev</button>
+                        <div class="calendar-month-title" id="calendarMonthTitle">November 2025</div>
+                        <button class="btn-secondary btn-sm" id="nextMonthBtn" onclick="app.calendar.nextMonth()">Next</button>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid"><!-- Populated by JavaScript --></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Legend</div>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-md); font-size: 0.9rem;">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                            <div style="width: 20px; height: 20px; background: rgba(232, 88, 106, 0.15); border-radius: 4px;"></div>
+                            <span>Period days</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                            <div style="width: 20px; height: 20px; background: rgba(240, 167, 109, 0.15); border: 2px solid var(--accent-predict); border-radius: 4px;"></div>
+                            <span>Predicted period start</span>
+                        </div>
+                        <div id="legendFertile" style="display: none; display: flex; align-items: center; gap: var(--spacing-md);">
+                            <div style="width: 20px; height: 20px; background: rgba(90, 180, 117, 0.15); border-radius: 4px;"></div>
+                            <span>Fertile window</span>
+                        </div>
+                        <div id="legendOvulation" style="display: none; display: flex; align-items: center; gap: var(--spacing-md);">
+                            <div style="width: 20px; height: 20px; background: rgba(255, 182, 217, 0.3); border: 2px solid var(--accent-ovulation); border-radius: 4px;"></div>
+                            <span>Ovulation day</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 4: HISTORY -->
+        <div class="screen" id="historyScreen">
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">Period History</div>
+                    <div id="historyList" class="list">
+                        <div class="empty-state-text">No periods logged yet</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: SETTINGS -->
+        <div class="screen" id="settingsScreen">
+            <div class="content">
+                <div class="card">
+                    <div class="card-header">Profile</div>
+                    <div class="form-group">
+                        <label for="settingsName">Your Name</label>
+                        <input type="text" id="settingsName" placeholder="Enter your name">
+                    </div>
+                    <button class="btn-primary" onclick="app.saveProfileName()">Save Name</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Tracking Preferences</div>
+                    <div class="form-group">
+                        <label>
+                            <div class="toggle-switch">
+                                <span>Trying to Conceive</span>
+                                <input type="checkbox" id="settingsTTC" onchange="app.saveSetting('isTryingToConceive', this.checked)">
+                            </div>
+                        </label>
+                        <div class="card-subtitle" style="margin-top: 8px;">Shows fertile window and ovulation predictions</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Security & Privacy</div>
+                    <div class="form-group">
+                        <label>
+                            <div class="toggle-switch">
+                                <span>Lock App with PIN</span>
+                                <input type="checkbox" id="settingsAppLock" onchange="app.toggleAppLock()">
+                            </div>
+                        </label>
+                        <div class="card-subtitle" style="margin-top: 8px;">Requires PIN to open the app</div>
+                    </div>
+                    <button class="btn-secondary" id="changePinBtn" onclick="app.showModal('changePinModal')" style="display: none;">Change PIN</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Appearance</div>
+                    <div class="form-group">
+                        <label>
+                            <div class="toggle-switch">
+                                <span>Dark Mode</span>
+                                <input type="checkbox" id="settingsDarkMode" onchange="app.toggleDarkMode()">
+                            </div>
+                        </label>
+                        <div class="card-subtitle" style="margin-top: 8px;">Switch between dark and light themes</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Data Management</div>
+                    <button class="btn-primary btn-full-width" onclick="app.showModal('exportModal')" style="margin-bottom: var(--spacing-md);">Export Encrypted Backup</button>
+                    <button class="btn-secondary btn-full-width" onclick="app.showModal('importModal')" style="margin-bottom: var(--spacing-md);">Import Backup</button>
+                    <button class="btn-danger btn-full-width" onclick="app.showModal('clearDataModal')">Clear All Data</button>
+                </div>
+
+                <div class="card">
+                    <button class="btn-secondary btn-full-width" onclick="app.showModal('aboutModal')">About & Privacy</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: Add Period -->
+        <div class="modal-overlay hidden" id="addPeriodModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Add Period Start</span>
+                    <button class="modal-close" onclick="app.hideModal('addPeriodModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label for="addPeriodDate">Start Date</label>
+                    <input type="date" id="addPeriodDate">
+                </div>
+                <div class="form-group">
+                    <label for="addPeriodEndDate">End Date (optional)</label>
+                    <input type="date" id="addPeriodEndDate">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary btn-full-width" onclick="app.hideModal('addPeriodModal')">Cancel</button>
+                    <button class="btn-primary btn-full-width" onclick="app.addPeriod()">Add Period</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: Edit Period -->
+        <div class="modal-overlay hidden" id="editPeriodModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Edit Period</span>
+                    <button class="modal-close" onclick="app.hideModal('editPeriodModal')">×</button>
+                </div>
+                <div class="form-group">
+                    <label for="editPeriodDate">Start Date</label>
+                    <input type="date" id="editPeriodDate">
+                </div>
+                <div class="form-group">
+                    <label for="editPeriodEndDate">End Date (optional)</label>
+                    <input type="date" id="editPeriodEndDate">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-danger" onclick="app.deletePeriod(app.currentEditingPeriodId)">Delete</button>
+                    <button class="btn-secondary" onclick="app.hideModal('editPeriodModal')">Cancel</button>
+                    <button class="btn-primary" onclick="app.updatePeriod()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: Change PIN -->
+        <div class="modal-overlay hidden" id="changePinModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Setup PIN Lock</span>
+                    <button class="modal-close" onclick="app.hideModal('changePinModal')">×</button>
+                </div>
+                <p style="color: var(--text-gray); margin-bottom: var(--spacing-lg);">Enter a 4-6 digit PIN to lock your app</p>
+                <div class="form-group">
+                    <label for="newPin">New PIN</label>
+                    <input type="password" id="newPin" inputmode="numeric" placeholder="4-6 digits" pattern="[0-9]{4,6}">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPin">Confirm PIN</label>
+                    <input type="password" id="confirmPin" inputmode="numeric" placeholder="Re-enter PIN" pattern="[0-9]{4,6}">
+                </div>
+                <div id="pinSetupError" style="color: var(--error); font-size: 0.9rem; margin-bottom: var(--spacing-md);"></div>
+                <div class="modal-footer">
+                    <button class="btn-secondary btn-full-width" onclick="app.hideModal('changePinModal')">Cancel</button>
+                    <button class="btn-primary btn-full-width" onclick="app.setupPin()">Set PIN</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: Export Backup -->
+        <div class="modal-overlay hidden" id="exportModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Export Encrypted Backup</span>
+                    <button class="modal-close" onclick="app.hideModal('exportModal')">×</button>
+                </div>
+                <p style="color: var(--text-gray); margin-bottom: var(--spacing-lg);">All your data will be encrypted with a password and downloaded. Keep it safe!</p>
+                <div class="form-group">
+                    <label for="exportPassword">Backup Password</label>
+                    <input type="password" id="exportPassword" placeholder="Enter a strong password">
+                </div>
+                <div class="card-subtitle" style="margin-top: 5px;">You'll need this to restore the backup</div>
+                <div class="form-group" style="margin-top: var(--spacing-md);">
+                    <label for="exportPasswordConfirm">Confirm Password</label>
+                    <input type="password" id="exportPasswordConfirm" placeholder="Re-enter password">
+                </div>
+                <div id="exportError" style="color: var(--error); font-size: 0.9rem; margin-bottom: var(--spacing-md);"></div>
+                <div class="modal-footer">
+                    <button class="btn-secondary btn-full-width" onclick="app.hideModal('exportModal')">Cancel</button>
+                    <button class="btn-primary btn-full-width" id="exportBtn" onclick="app.exportBackup()">Download Backup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: Import Backup -->
+        <div class="modal-overlay hidden" id="importModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Import Encrypted Backup</span>
+                    <button class="modal-close" onclick="app.hideModal('importModal')">×</button>
+                </div>
+                <p style="color: var(--text-gray); margin-bottom: var(--spacing-lg);">Select a backup file and enter the password to restore your data.</p>
+                <div class="form-group">
+                    <label for="importFile">Select Backup File</label>
+                    <input type="file" id="importFile" accept=".enc,application/octet-stream">
+                </div>
+                <div class="card-subtitle" style="margin-top: 5px;">Files: privatecycle-backup.json.enc</div>
+                <div class="form-group" style="margin-top: var(--spacing-md);">
+                    <label for="importPassword">Backup Password</label>
+                    <input type="password" id="importPassword" placeholder="Enter the backup password">
+                </div>
+                <div id="importError" style="color: var(--error); font-size: 0.9rem; margin-bottom: var(--spacing-md);"></div>
+                <div class="modal-footer">
+                    <button class="btn-secondary btn-full-width" onclick="app.hideModal('importModal')">Cancel</button>
+                    <button class="btn-primary btn-full-width" id="importBtn" onclick="app.importBackup()">Import Backup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: Clear Data -->
+        <div class="modal-overlay hidden" id="clearDataModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Clear All Data</span>
+                    <button class="modal-close" onclick="app.hideModal('clearDataModal')">×</button>
+                </div>
+                <div class="alert alert-error">
+                    <div class="alert-icon">⚠️</div>
+                    <div>
+                        <strong>This cannot be undone!</strong>
+                        <p style="margin-top: 5px;">All your period data, settings, and profile information will be permanently deleted.</p>
+                    </div>
+                </div>
+                <p style="color: var(--text-gray); margin-bottom: var(--spacing-lg); margin-top: var(--spacing-lg);">Type DELETE below to confirm</p>
+                <div class="form-group">
+                    <input type="text" id="clearDataConfirm" placeholder="Type DELETE to confirm">
+                </div>
+                <script>
+                    document.getElementById('clearDataConfirm').addEventListener('input', function() {
+                        document.getElementById('clearDataBtn').disabled = this.value !== 'DELETE';
+                    });
+                </script>
+                <div class="modal-footer">
+                    <button class="btn-secondary btn-full-width" onclick="app.hideModal('clearDataModal')">Cancel</button>
+                    <button class="btn-danger btn-full-width" id="clearDataBtn" disabled onclick="app.clearAllData()">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODALS: About -->
+        <div class="modal-overlay hidden" id="aboutModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>About PrivateCycle</span>
+                    <button class="modal-close" onclick="app.hideModal('aboutModal')">×</button>
+                </div>
+                <div style="color: var(--text-gray); line-height: 1.8;">
+                    <h3 style="color: var(--primary); margin-top: 0;">Your Privacy, Our Priority</h3>
+                    <p><strong>PrivateCycle</strong> is a completely private, offline period tracking app. All your data stays on your device—no servers, no cloud, no tracking.</p>
+                    
+                    <h4 style="color: var(--primary); margin-top: var(--spacing-lg);">What We Don't Do</h4>
+                    <ul style="list-style-position: inside; margin-left: 10px;">
+                        <li>No account required</li>
+                        <li>No internet connection needed</li>
+                        <li>No analytics or ads</li>
+                        <li>No third-party data sharing</li>
+                        <li>No tracking or profiling</li>
+                    </ul>
+
+                    <h4 style="color: var(--primary); margin-top: var(--spacing-lg);">How We Keep You Safe</h4>
+                    <ul style="list-style-position: inside; margin-left: 10px;">
+                        <li>Optional PIN lock for your phone</li>
+                        <li>Encrypted backups with AES-256</li>
+                        <li>Open-source code—inspect it yourself</li>
+                        <li>No authentication or login</li>
+                    </ul>
+
+                    <h4 style="color: var(--primary); margin-top: var(--spacing-lg);">How Predictions Work</h4>
+                    <p>PrivateCycle uses Naegele's rule and cycle pattern analysis for accurate predictions:</p>
+                    <ol style="list-style-position: inside; margin-left: 10px;">
+                        <li>Calculate average cycle length from your last 6-12 cycles</li>
+                        <li>Add average length to your last period start date</li>
+                        <li>For Trying to Conceive: estimate ovulation at day 14 before next period</li>
+                        <li>Show fertile window 5 days before to 1 day after ovulation</li>
+                        <li>Adjust predictions based on variations in your cycles</li>
+                    </ol>
+
+                    <p style="margin-top: var(--spacing-lg); font-size: 0.9rem;">
+                        <strong>Medical Disclaimer</strong><br>
+                        This app is for tracking and education only. It is not a contraceptive tool and should not be relied upon for preventing pregnancy. Consult a healthcare provider for medical advice.
+                    </p>
+                    
+                    <div style="background: var(--bg-light); padding: var(--spacing-md); border-radius: var(--radius); margin-top: var(--spacing-lg);">
+                        <p style="margin: 0; font-size: 0.85rem;">
+                            <strong>Version</strong> 1.1.0<br>
+                            <strong>Last Updated</strong> November 2025
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer" style="margin-top: var(--spacing-lg);">
+                    <button class="btn-secondary btn-full-width" onclick="app.hideModal('aboutModal')">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CRYPTO UTILITIES =====
+        const Crypto = {
+            async hashPIN(pin) {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(pin);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                return this.bufferToHex(hashBuffer);
+            },
+            bufferToHex(buffer) {
+                const view = new Uint8Array(buffer);
+                return Array.from(view).map(b => b.toString(16).padStart(2, '0')).join('');
+            },
+            hexToBuffer(hex) {
+                const bytes = new Uint8Array(hex.length / 2);
+                for (let i = 0; i < hex.length; i += 2) {
+                    bytes[i / 2] = parseInt(hex.substr(i, 2), 16);
+                }
+                return bytes;
+            },
+            generateSalt(length = 16) {
+                return crypto.getRandomValues(new Uint8Array(length));
+            },
+            async encryptBackup(data, password) {
+                try {
+                    const encoder = new TextEncoder();
+                    const jsonString = JSON.stringify(data);
+                    const plaintext = encoder.encode(jsonString);
+                    const salt = this.generateSalt(32);
+                    const iv = this.generateSalt(12);
+                    const passwordKey = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
+                    const key = await crypto.subtle.deriveKey(
+                        { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+                        passwordKey,
+                        { name: 'AES-GCM', length: 256 },
+                        false,
+                        ['encrypt']
+                    );
+                    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, plaintext);
+                    const version = new Uint8Array(1);
+                    const encrypted = new Uint8Array(version.length + salt.length + iv.length + ciphertext.byteLength);
+                    encrypted.set(version, 0);
+                    encrypted.set(salt, version.length);
+                    encrypted.set(iv, version.length + salt.length);
+                    encrypted.set(new Uint8Array(ciphertext), version.length + salt.length + iv.length);
+                    return this.bufferToHex(encrypted);
+                } catch (e) {
+                    console.error('Encryption failed:', e);
+                    throw new Error('Failed to encrypt backup');
+                }
+            },
+            async decryptBackup(encryptedHex, password) {
+                try {
+                    const encoder = new TextEncoder();
+                    const encrypted = this.hexToBuffer(encryptedHex);
+                    const version = encrypted[0];
+                    if (version !== 1) throw new Error('Invalid backup version');
+                    const salt = encrypted.slice(1, 33);
+                    const iv = encrypted.slice(33, 45);
+                    const ciphertext = encrypted.slice(45);
+                    const passwordKey = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveKey']);
+                    const key = await crypto.subtle.deriveKey(
+                        { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+                        passwordKey,
+                        { name: 'AES-GCM', length: 256 },
+                        false,
+                        ['decrypt']
+                    );
+                    const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ciphertext);
+                    const jsonString = new TextDecoder().decode(plaintext);
+                    return JSON.parse(jsonString);
+                } catch (e) {
+                    console.error('Decryption failed:', e);
+                    throw new Error('Failed to decrypt backup (wrong password?)');
+                }
+            }
+        };
+
+        // ===== DATA STORAGE LAYER =====
+        const Store = {
+            KEYS: { PROFILE: 'pc_profile', PERIODS: 'pc_periods', SETTINGS: 'pc_settings', APPLOCK_PIN: 'pc_applock_pin' },
+            loadAll() {
+                return {
+                    profile: this.getProfile(),
+                    periods: this.getPeriods(),
+                    settings: this.getSettings()
+                };
+            },
+            getProfile() {
+                const profile = localStorage.getItem(this.KEYS.PROFILE);
+                return profile ? JSON.parse(profile) : { name: 'User' };
+            },
+            setProfile(profile) {
+                localStorage.setItem(this.KEYS.PROFILE, JSON.stringify(profile));
+            },
+            getPeriods() {
+                const periods = localStorage.getItem(this.KEYS.PERIODS);
+                return periods ? JSON.parse(periods) : [];
+            },
+            setPeriods(periods) {
+                localStorage.setItem(this.KEYS.PERIODS, JSON.stringify(periods));
+            },
+            addPeriod(startDate, endDate = null) {
+                const periods = this.getPeriods();
+                const id = 'p' + Date.now() + Math.random().toString(36).substr(2, 9);
+                periods.push({ id, startDate, endDate });
+                periods.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+                this.setPeriods(periods);
+                return id;
+            },
+            updatePeriod(id, startDate, endDate = null) {
+                const periods = this.getPeriods();
+                const period = periods.find(p => p.id === id);
+                if (period) {
+                    period.startDate = startDate;
+                    period.endDate = endDate;
+                    periods.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+                    this.setPeriods(periods);
+                }
+            },
+            deletePeriod(id) {
+                const periods = this.getPeriods().filter(p => p.id !== id);
+                this.setPeriods(periods);
+            },
+            getSettings() {
+                const settings = localStorage.getItem(this.KEYS.SETTINGS);
+                return settings ? JSON.parse(settings) : { isTryingToConceive: false, isAppLockEnabled: false, isDarkMode: true, appLockPin: null };
+            },
+            setSetting(key, value) {
+                const settings = this.getSettings();
+                settings[key] = value;
+                localStorage.setItem(this.KEYS.SETTINGS, JSON.stringify(settings));
+            },
+            getAppLockPin() {
+                return localStorage.getItem(this.KEYS.APPLOCK_PIN);
+            },
+            setAppLockPin(pinHash) {
+                localStorage.setItem(this.KEYS.APPLOCK_PIN, pinHash);
+            },
+            clearAll() {
+                localStorage.clear();
+            }
+        };
+
+        // ===== PREDICTION LOGIC (IMPROVED ACCURACY) =====
+        const Prediction = {
+            calculate(periods) {
+                if (periods.length < 2) return null;
+                
+                // Sort by start date ascending
+                const starts = periods.map(p => new Date(p.startDate)).sort((a, b) => a - b);
+                
+                // Calculate cycle lengths
+                const cycleLengths = [];
+                for (let i = 1; i < starts.length; i++) {
+                    const diff = Math.round((starts[i] - starts[i - 1]) / (1000 * 60 * 60 * 24));
+                    if (diff >= 15 && diff <= 60) cycleLengths.push(diff); // Filter outliers
+                }
+                
+                if (cycleLengths.length === 0) return null;
+                
+                // Use last 6-12 cycles for better accuracy (Naegele's rule)
+                const recentCycles = cycleLengths.slice(-12);
+                const avgCycle = Math.round(recentCycles.reduce((a, b) => a + b, 0) / recentCycles.length);
+                
+                // Standard deviation for better predictions
+                const variance = recentCycles.reduce((sum, x) => sum + Math.pow(x - avgCycle, 2), 0) / recentCycles.length;
+                const stdDev = Math.sqrt(variance);
+                
+                // Predict next period
+                const lastStart = starts[starts.length - 1];
+                const nextPeriod = new Date(lastStart);
+                nextPeriod.setDate(nextPeriod.getDate() + avgCycle);
+                
+                // For TTC: Calculate fertile window based on ovulation
+                const ovulation = new Date(nextPeriod);
+                ovulation.setDate(ovulation.getDate() - 14); // Ovulation ~14 days before period
+                
+                const fertileStart = new Date(ovulation);
+                fertileStart.setDate(fertileStart.getDate() - 5); // 5 days before
+                
+                const fertileEnd = new Date(ovulation);
+                fertileEnd.setDate(fertileEnd.getDate() + 1); // 1 day after
+                
+                return {
+                    nextPeriodDate: nextPeriod,
+                    ovulationDate: ovulation,
+                    fertileWindow: { start: fertileStart, end: fertileEnd },
+                    avgCycleLength: avgCycle,
+                    variance: stdDev
+                };
+            }
+        };
+
+        // ===== MAIN APP =====
+        const app = {
+            state: {
+                currentScreen: 'onboarding',
+                currentEditingPeriodId: null,
+                isUnlocked: false,
+                calendar: { currentDate: new Date() }
+            },
+
+            init() {
+                console.log('🎯 APP INITIALIZING');
+                const profile = Store.getProfile();
+                const periods = Store.getPeriods();
+                if (profile.name && periods.length > 0) {
+                    this.showScreen('home');
+                } else {
+                    this.showScreen('onboarding');
+                }
+                this.setupPINLock();
+                this.updateUI();
+                this.attachEventListeners();
+                console.log('✅ APP READY');
+            },
+
+            setupPINLock() {
+                const settings = Store.getSettings();
+                if (settings.isAppLockEnabled) {
+                    this.showLockScreen();
+                } else {
+                    this.hideLockScreen();
+                    this.isUnlocked = true;
+                }
+            },
+
+            showLockScreen() {
+                document.getElementById('lockScreen').classList.remove('hidden');
+                this.isUnlocked = false;
+                setTimeout(() => this.setupPINInputHandlers(), 100);
+            },
+
+            hideLockScreen() {
+                document.getElementById('lockScreen').classList.add('hidden');
+                this.isUnlocked = true;
+            },
+
+            setupPINInputHandlers() {
+                const inputs = document.querySelectorAll('#pinInputContainer .pin-digit');
+                console.log('🔍 Found PIN inputs:', inputs.length);
+                inputs.forEach((input, index) => {
+                    input.addEventListener('input', (e) => {
+                        if (e.target.value) {
+                            if (index < inputs.length - 1) inputs[index + 1].focus();
+                            else this.checkPIN();
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                            inputs[index - 1].focus();
+                        }
+                    });
+                });
+                document.getElementById('forgotPinBtn').addEventListener('click', () => {
+                    if (confirm('This will delete ALL data. Are you sure?')) {
+                        Store.clearAll();
+                        location.reload();
+                    }
+                });
+                if (inputs[0]) inputs[0].focus();
+            },
+
+            async checkPIN() {
+                console.log('🔍 Checking PIN...');
+                const inputs = document.querySelectorAll('#pinInputContainer .pin-digit');
+                const pin = Array.from(inputs).map(i => i.value).join('');
+                if (pin.length === 4) {
+                    const pinHash = await Crypto.hashPIN(pin);
+                    const storedHash = Store.getAppLockPin();
+                    if (pinHash === storedHash) {
+                        inputs.forEach(i => i.value = '');
+                        document.getElementById('pinError').textContent = '';
+                        this.hideLockScreen();
+                    } else {
+                        document.getElementById('pinError').textContent = 'Invalid PIN';
+                        setTimeout(() => {
+                            inputs.forEach(i => i.value = '');
+                            document.getElementById('pinError').textContent = '';
+                            inputs[0].focus();
+                        }, 1500);
+                    }
+                }
+            },
+
+            async toggleAppLock() {
+                const toggle = document.getElementById('settingsAppLock');
+                const changePinBtn = document.getElementById('changePinBtn');
+                if (toggle.checked) {
+                    this.showModal('changePinModal');
+                } else {
+                    Store.setSetting('isAppLockEnabled', false);
+                    changePinBtn.style.display = 'none';
+                    this.setupPINLock();
+                }
+            },
+
+            async setupPin() {
+                const newPin = document.getElementById('newPin').value;
+                const confirmPin = document.getElementById('confirmPin').value;
+                const errorEl = document.getElementById('pinSetupError');
+                if (newPin.length < 4 || newPin.length > 6) {
+                    errorEl.textContent = 'PIN must be 4-6 digits';
+                    return;
+                }
+                if (!/^\d+$/.test(newPin)) {
+                    errorEl.textContent = 'PIN must contain only digits';
+                    return;
+                }
+                if (newPin !== confirmPin) {
+                    errorEl.textContent = 'PINs do not match';
+                    return;
+                }
+                const pinHash = await Crypto.hashPIN(newPin);
+                Store.setAppLockPin(pinHash);
+                Store.setSetting('isAppLockEnabled', true);
+                document.getElementById('settingsAppLock').checked = true;
+                document.getElementById('changePinBtn').style.display = 'block';
+                errorEl.textContent = '';
+                this.hideModal('changePinModal');
+                document.getElementById('newPin').value = '';
+                document.getElementById('confirmPin').value = '';
+                alert('PIN set successfully!');
+            },
+
+            toggleDarkMode() {
+                const toggle = document.getElementById('settingsDarkMode');
+                const isDark = !toggle.checked;
+                Store.setSetting('isDarkMode', isDark);
+                if (isDark) {
+                    document.body.classList.remove('light-theme');
+                } else {
+                    document.body.classList.add('light-theme');
+                }
+            },
+
+            loadTheme() {
+                const settings = Store.getSettings();
+                const isDark = settings.isDarkMode !== false;
+                const toggle = document.getElementById('settingsDarkMode');
+                if (toggle) toggle.checked = !isDark;
+                if (!isDark) {
+                    document.body.classList.add('light-theme');
+                }
+            },
+
+            showScreen(name) {
+                if (!this.isUnlocked && name !== 'onboarding') return;
+                const navContainer = document.querySelector('.nav-buttons');
+                if (navContainer) navContainer.style.display = name === 'onboarding' ? 'none' : 'flex';
+                document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+                const targetScreen = document.getElementById(name + 'Screen');
+                if (targetScreen) targetScreen.classList.add('active');
+                this.state.currentScreen = name;
+                if (name === 'home') this.updateDashboard();
+                if (name === 'calendar') this.renderCalendar();
+                if (name === 'history') this.updateHistoryList();
+            },
+
+            showModal(id) {
+                document.getElementById(id).classList.remove('hidden');
+                if (id === 'addPeriodModal') {
+                    document.getElementById('addPeriodDate').valueAsDate = new Date();
+                }
+            },
+
+            hideModal(id) {
+                document.getElementById(id).classList.add('hidden');
+            },
+
+            completeOnboarding() {
+                const name = document.getElementById('onboardingName').value.trim() || 'User';
+                Store.setProfile({ name });
+                this.showScreen('home');
+                this.updateUI();
+            },
+
+            updateUI() {
+                const profile = Store.getProfile();
+                const settings = Store.getSettings();
+                document.getElementById('homeGreeting').textContent = `Hi ${profile.name}!`;
+                document.getElementById('settingsName').value = profile.name;
+                document.getElementById('settingsTTC').checked = settings.isTryingToConceive;
+                document.getElementById('settingsAppLock').checked = settings.isAppLockEnabled;
+                document.getElementById('settingsDarkMode').checked = !settings.isDarkMode;
+                document.getElementById('changePinBtn').style.display = settings.isAppLockEnabled ? 'block' : 'none';
+                this.loadTheme();
+                this.showScreen('home');
+            },
+
+            updateDashboard() {
+                const periods = Store.getPeriods();
+                const prediction = Prediction.calculate(periods);
+                const settings = Store.getSettings();
+                document.getElementById('totalPeriodsCount').textContent = periods.length;
+                if (prediction) {
+                    document.getElementById('avgCycleLength').textContent = prediction.avgCycleLength + ' days';
+                    document.getElementById('predictionDate').textContent = prediction.nextPeriodDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    document.getElementById('predictionInfo').textContent = 'Next period in ~' + Math.round((prediction.nextPeriodDate - new Date()) / (1000 * 60 * 60 * 24)) + ' days';
+                    if (settings.isTryingToConceive) {
+                        document.getElementById('legendFertile').style.display = 'flex';
+                        document.getElementById('legendOvulation').style.display = 'flex';
+                        document.getElementById('fertileWindowPanel').style.display = 'block';
+                        document.getElementById('fertileWindowDate').textContent = prediction.fertileWindow.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' - ' + prediction.fertileWindow.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        document.getElementById('fertileWindowInfo').textContent = 'Peak fertility: ' + prediction.ovulationDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    } else {
+                        document.getElementById('legendFertile').style.display = 'none';
+                        document.getElementById('legendOvulation').style.display = 'none';
+                        document.getElementById('fertileWindowPanel').style.display = 'none';
+                    }
+                }
+                const lastPeriod = periods[0];
+                if (lastPeriod) {
+                    const daysSince = Math.round((new Date() - new Date(lastPeriod.startDate)) / (1000 * 60 * 60 * 24));
+                    document.getElementById('lastPeriodDaysAgo').textContent = daysSince;
+                }
+                this.renderRecentPeriods();
+            },
+
+            renderRecentPeriods() {
+                const periods = Store.getPeriods();
+                const list = document.getElementById('recentPeriodsList');
+                list.innerHTML = '';
+                if (periods.length === 0) {
+                    list.innerHTML = '<div class="empty-state-text">No periods logged yet</div>';
+                    return;
+                }
+                periods.slice(0, 5).forEach(period => {
+                    const startDate = new Date(period.startDate);
+                    const endDate = period.endDate ? new Date(period.endDate) : null;
+                    const cycleInfo = endDate ? ` (${Math.round((endDate - startDate) / (1000 * 60 * 60 * 24))} days)` : '';
+                    const listItem = document.createElement('div');
+                    listItem.className = 'list-item';
+                    listItem.innerHTML = `
+                        <div class="list-item-main">
+                            <div class="list-item-title">${this.formatDateHuman(startDate)}</div>
+                            <div class="list-item-subtitle">${this.formatDate(startDate)}${cycleInfo}</div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn-secondary btn-sm" onclick="app.editPeriod('${period.id}')">Edit</button>
+                        </div>
+                    `;
+                    list.appendChild(listItem);
+                });
+            },
+
+            renderCalendar() {
+                const year = this.state.calendar.currentDate.getFullYear();
+                const month = this.state.calendar.currentDate.getMonth();
+                const today = new Date();
+                document.getElementById('calendarMonthTitle').textContent = this.state.calendar.currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const startDate = new Date(firstDay);
+                startDate.setDate(startDate.getDate() - firstDay.getDay());
+                const grid = document.getElementById('calendarGrid');
+                grid.innerHTML = '';
+                const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                dayNames.forEach(day => {
+                    const header = document.createElement('div');
+                    header.className = 'calendar-day-header';
+                    header.textContent = day;
+                    grid.appendChild(header);
+                });
+                const periods = Store.getPeriods();
+                const prediction = Prediction.calculate(periods);
+                const settings = Store.getSettings();
+                let currentDate = new Date(startDate);
+                for (let i = 0; i < 42; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'calendar-day';
+                    if (currentDate.getMonth() !== month) cell.classList.add('empty');
+                    const dateStr = this.formatDate(currentDate);
+                    let isPeriod = false;
+                    periods.forEach(p => {
+                        const pStart = new Date(p.startDate);
+                        const pEnd = p.endDate ? new Date(p.endDate) : new Date(pStart);
+                        pEnd.setDate(pEnd.getDate() + 1);
+                        if (currentDate >= pStart && currentDate < pEnd) {
+                            isPeriod = true;
+                        }
+                    });
+                    if (isPeriod) {
+                        cell.classList.add('period');
+                        cell.textContent = currentDate.getDate();
+                    } else if (prediction) {
+                        if (currentDate.toDateString() === prediction.nextPeriodDate.toDateString()) {
+                            cell.classList.add('predicted');
+                            cell.textContent = currentDate.getDate();
+                        } else if (settings.isTryingToConceive) {
+                            if (currentDate >= prediction.fertileWindow.start && currentDate <= prediction.fertileWindow.end) {
+                                cell.classList.add('fertile');
+                                cell.textContent = currentDate.getDate();
+                            } else if (currentDate.toDateString() === prediction.ovulationDate.toDateString()) {
+                                cell.classList.add('ovulation');
+                                cell.textContent = currentDate.getDate();
+                            } else if (currentDate.getMonth() === month) {
+                                cell.textContent = currentDate.getDate();
+                            }
+                        } else if (currentDate.getMonth() === month) {
+                            cell.textContent = currentDate.getDate();
+                        }
+                    } else if (currentDate.getMonth() === month) {
+                        cell.textContent = currentDate.getDate();
+                    }
+                    grid.appendChild(cell);
+                    currentDate.setDate(currentDate.getDate() + 1);
+                }
+            },
+
+            updateHistoryList() {
+                const periods = Store.getPeriods();
+                const list = document.getElementById('historyList');
+                list.innerHTML = '';
+                if (periods.length === 0) {
+                    list.innerHTML = '<div class="empty-state-text">No periods logged yet</div>';
+                    return;
+                }
+                periods.forEach(period => {
+                    const startDate = new Date(period.startDate);
+                    const endDate = period.endDate ? new Date(period.endDate) : null;
+                    const duration = endDate ? Math.round((endDate - startDate) / (1000 * 60 * 60 * 24)) + ' days' : 'Ongoing';
+                    const listItem = document.createElement('div');
+                    listItem.className = 'list-item';
+                    listItem.innerHTML = `
+                        <div class="list-item-main">
+                            <div class="list-item-title">${this.formatDateHuman(startDate)}</div>
+                            <div class="list-item-subtitle">${duration}</div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="btn-secondary btn-sm" onclick="app.editPeriod('${period.id}')">Edit</button>
+                        </div>
+                    `;
+                    list.appendChild(listItem);
+                });
+            },
+
+            addPeriod() {
+                const startDate = document.getElementById('addPeriodDate').value;
+                const endDate = document.getElementById('addPeriodEndDate').value;
+                if (!startDate) {
+                    alert('Please select a start date');
+                    return;
+                }
+                Store.addPeriod(startDate, endDate || null);
+                this.hideModal('addPeriodModal');
+                this.updateDashboard();
+                this.renderCalendar();
+                this.updateHistoryList();
+            },
+
+            editPeriod(id) {
+                this.state.currentEditingPeriodId = id;
+                const period = Store.getPeriods().find(p => p.id === id);
+                document.getElementById('editPeriodDate').value = period.startDate;
+                document.getElementById('editPeriodEndDate').value = period.endDate || '';
+                this.showModal('editPeriodModal');
+            },
+
+            updatePeriod() {
+                const startDate = document.getElementById('editPeriodDate').value;
+                const endDate = document.getElementById('editPeriodEndDate').value;
+                Store.updatePeriod(this.state.currentEditingPeriodId, startDate, endDate || null);
+                this.hideModal('editPeriodModal');
+                this.updateDashboard();
+                this.renderCalendar();
+                this.updateHistoryList();
+            },
+
+            deletePeriod(id) {
+                if (confirm('Are you sure you want to delete this period?')) {
+                    Store.deletePeriod(id);
+                    this.hideModal('editPeriodModal');
+                    this.updateDashboard();
+                    this.renderCalendar();
+                    this.updateHistoryList();
+                }
+            },
+
+            saveProfileName() {
+                const name = document.getElementById('settingsName').value.trim() || 'User';
+                Store.setProfile({ name });
+                this.updateUI();
+                alert('Profile name saved!');
+            },
+
+            saveSetting(key, value) {
+                Store.setSetting(key, value);
+                this.updateDashboard();
+            },
+
+            async exportBackup() {
+                const password = document.getElementById('exportPassword').value;
+                const confirmPassword = document.getElementById('exportPasswordConfirm').value;
+                const errorEl = document.getElementById('exportError');
+                if (!password || !confirmPassword) {
+                    errorEl.textContent = 'Please enter a password';
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    errorEl.textContent = 'Passwords do not match';
+                    return;
+                }
+                if (password.length < 8) {
+                    errorEl.textContent = 'Password must be at least 8 characters';
+                    return;
+                }
+                try {
+                    const data = Store.loadAll();
+                    const encrypted = await Crypto.encryptBackup(data, password);
+                    const blob = new Blob([encrypted], { type: 'application/octet-stream' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'privatecycle-backup-' + new Date().getTime() + '.enc';
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    errorEl.textContent = '';
+                    this.hideModal('exportModal');
+                    document.getElementById('exportPassword').value = '';
+                    document.getElementById('exportPasswordConfirm').value = '';
+                    alert('Backup downloaded successfully!');
+                } catch (e) {
+                    errorEl.textContent = e.message;
+                }
+            },
+
+            async importBackup() {
+                const fileInput = document.getElementById('importFile');
+                const password = document.getElementById('importPassword').value;
+                const errorEl = document.getElementById('importError');
+                if (!fileInput.files[0]) {
+                    errorEl.textContent = 'Please select a backup file';
+                    return;
+                }
+                if (!password) {
+                    errorEl.textContent = 'Please enter the backup password';
+                    return;
+                }
+                try {
+                    const file = fileInput.files[0];
+                    const text = await file.text();
+                    const data = await Crypto.decryptBackup(text, password);
+                    Store.setProfile(data.profile);
+                    Store.setPeriods(data.periods);
+                    Store.setSetting('isTryingToConceive', data.settings.isTryingToConceive);
+                    Store.setSetting('isDarkMode', data.settings.isDarkMode);
+                    errorEl.textContent = '';
+                    this.hideModal('importModal');
+                    fileInput.value = '';
+                    document.getElementById('importPassword').value = '';
+                    alert('Backup imported successfully!');
+                    this.updateUI();
+                } catch (e) {
+                    errorEl.textContent = e.message;
+                }
+            },
+
+            clearAllData() {
+                Store.clearAll();
+                location.reload();
+            },
+
+            formatDate(date) {
+                return date.toISOString().split('T')[0];
+            },
+
+            formatDateHuman(date) {
+                return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+            },
+
+            attachEventListeners() {
+                this.state.calendar.prevMonth = () => {
+                    this.state.calendar.currentDate.setMonth(this.state.calendar.currentDate.getMonth() - 1);
+                    this.renderCalendar();
+                };
+                this.state.calendar.nextMonth = () => {
+                    this.state.calendar.currentDate.setMonth(this.state.calendar.currentDate.getMonth() + 1);
+                    this.renderCalendar();
+                };
+            }
+        };
+
+        // ===== APP INITIALIZATION =====
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM LOADED - STARTING APP');
+            app.init();
+        });
+
+        // Handle page visibility - lock app when minimized
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                const settings = Store.getSettings();
+                if (settings.isAppLockEnabled) {
+                    app.isUnlocked = false;
+                    app.setupPINLock();
+                }
+            }
+        });
+
+        // Prevent right-click for privacy
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>
