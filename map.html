@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Map - Shadow Fleet Stalker</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="logo">🛰️ Shadow Fleet Stalker</h1>
+            <div class="nav-links">
+                <a href="index.html">Dashboard</a>
+                <a href="map.html" class="active">Live Map</a>
+                <a href="vessels.html">Vessels</a>
+                <button id="darkModeToggle" class="btn-icon">🌙</button>
+                <button id="refreshBtn" class="btn-primary">↻ Refresh</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="map-controls">
+        <select id="vesselFilter" class="control-select">
+            <option value="all">All Vessels</option>
+            <option value="critical">Critical Threat</option>
+            <option value="iran">Iranian</option>
+            <option value="russia">Russian</option>
+            <option value="nk">North Korean</option>
+        </select>
+        <label class="toggle">
+            <input type="checkbox" id="trackToggle">
+            <span>Show Tracks</span>
+        </label>
+        <label class="toggle">
+            <input type="checkbox" id="clusterToggle" checked>
+            <span>Cluster Markers</span>
+        </label>
+    </div>
+
+    <div id="mainMap" style="height: calc(100vh - 120px);"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+    <script src="map.js"></script>
+    <script src="ais-updater.js"></script>
+</body>
+</html>
