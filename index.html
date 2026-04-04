@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<!--
+  Not Your Grandma's Cellar, LLC
+  Landing Page — v1.2
+  Author: GitHub/1800downed
+  License: Client Project — All Rights Reserved
+
+  v1.2 changes:
+    - Products section rebuilt as priced shop mockup
+    - Dandelion Jelly: 4oz $14 / 8oz $20
+    - Blackberry Jelly: 4oz $14 / 8oz $20
+    - Prickly Pear Jelly (limited): 4oz $20 / 8oz $32
+    - Limited-time banner on Prickly Pear
+    - Flat-rate USPS shipping note on all products
+    - Local pickup available at increased price (via order form)
+    - Order form: product selector with sizes/prices
+    - Form copy cleaned
+    - Formspree endpoint: xgoppawj
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Not Your Grandma's Cellar LLC — artisan canning and farm fresh produce from Lincoln County, WV. Est. 2026." />
+  <meta property="og:title" content="Not Your Grandma's Cellar, LLC" />
+  <meta property="og:description" content="Artisan canning and farm fresh produce — Lincoln County, WV. Est. 2026." />
+  <meta property="og:image" content="assets/banner.jpg" />
+  <meta name="theme-color" content="#2c3d1a" />
+  <title>Not Your Grandma's Cellar, LLC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ======================================================
+       NAVIGATION
+  ====================================================== -->
+  <header class="site-header" id="top">
+    <nav class="navbar container" role="navigation" aria-label="Primary navigation">
+
+      <a href="#top" class="brand" aria-label="Not Your Grandma's Cellar — home">
+        <img
+          src="assets/logo-badge.jpg"
+          alt="Not Your Grandma's Cellar circular badge logo"
+          class="brand-logo"
+          width="48" height="48"
+          loading="eager"
+        />
+        <span class="brand-text">
+          Not Your Grandma's Cellar
+          <small>Canning &amp; Farm Fresh Produce</small>
+        </span>
+      </a>
+
+      <button
+        class="nav-toggle"
+        id="navToggle"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="navMenu"
+      >
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+
+      <ul class="nav-menu" id="navMenu" role="list">
+        <li><a href="#about">About</a></li>
+        <li><a href="#products">Shop</a></li>
+        <li><a href="#order">Order</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#order" class="nav-cta">Pre-Order</a></li>
+      </ul>
+
+    </nav>
+  </header>
+
+
+  <!-- ======================================================
+       HERO
+  ====================================================== -->
+  <section class="hero" id="hero" aria-label="Hero">
+
+    <div class="hero__media" aria-hidden="true">
+      <img
+        src="assets/banner.jpg"
+        alt=""
+        class="hero__img"
+        loading="eager"
+        decoding="async"
+        width="1200" height="400"
+        fetchpriority="high"
+      />
+      <div class="hero__overlay"></div>
+    </div>
+
+    <div class="hero__body container">
+      <p class="hero__eyebrow">Lincoln County, West Virginia &mdash; Est. 2026</p>
+      <h1 class="hero__title">Not Your Grandma's<br />Cellar, LLC</h1>
+      <p class="hero__sub">
+        Artisan canning, preserves, and farm fresh produce grown and crafted
+        in the heart of Lincoln County. Small batch. Real ingredients.
+        No shortcuts.
+      </p>
+      <div class="hero__actions">
+        <a href="#order" class="btn btn--primary">Place a Pre-Order</a>
+        <a href="#products" class="btn btn--outline">Shop Products</a>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ======================================================
+       ABOUT
+  ====================================================== -->
+  <section class="section about" id="about">
+    <div class="container about__grid">
+
+      <div class="about__media">
+        <img
+          src="assets/logo-badge.jpg"
+          alt="Not Your Grandma's Cellar official badge"
+          class="about__badge-img"
+          loading="lazy"
+          decoding="async"
+          width="380" height="380"
+        />
+      </div>
+
+      <div class="about__copy">
+        <p class="section__label">Our Story</p>
+        <h2>Rooted in Tradition,<br />Raised for Today</h2>
+        <p>
+          Not Your Grandma's Cellar started with a simple conviction: the
+          best preserves are made the old way — fresh produce, proper process,
+          and patience. What Grandma perfected in her cellar, we've scaled
+          into a small-batch operation serving Lincoln County and beyond.
+        </p>
+        <p>
+          Every jar is water-bath or pressure canned to USDA standards.
+          Every tomato, berry, and bloom is sourced from our own farm or from
+          neighbors we trust by name.
+        </p>
+        <a href="#order" class="btn btn--primary">Order Now</a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       SHOP / PRODUCTS
+       bg-label.jpg ghosted as texture via .products::before
+  ====================================================== -->
+  <section class="section products" id="products">
+    <div class="container">
+
+      <header class="section__header">
+        <p class="section__label">Handmade in Lincoln County</p>
+        <h2>Shop Our Preserves</h2>
+        <p class="section__sub">
+          Available in 4 oz and 8 oz cans. Ships flat-rate USPS nationwide.
+          Local pickup available — pricing discussed via order form.
+        </p>
+      </header>
+
+      <!-- Shipping notice bar -->
+      <div class="shipping-bar" role="note" aria-label="Shipping information">
+        <svg viewBox="0 0 20 20" fill="none" width="18" height="18" aria-hidden="true">
+          <rect x="1" y="7" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M14 10h3l2 3v4h-5V10z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="5"  cy="18" r="1.5" fill="currentColor"/>
+          <circle cx="16" cy="18" r="1.5" fill="currentColor"/>
+        </svg>
+        <span>All orders ship <strong>flat-rate USPS</strong> &mdash; one low rate regardless of quantity.</span>
+        <span class="shipping-bar__divider" aria-hidden="true"></span>
+        <svg viewBox="0 0 20 20" fill="none" width="18" height="18" aria-hidden="true">
+          <path d="M10 2C6.13 2 3 5.13 3 9c0 5.25 7 11 7 11s7-5.75 7-11c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="10" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <span>Local pickup available at a reduced rate &mdash; <a href="#order">request via order form</a>.</span>
+      </div>
+
+      <!-- ── STANDARD PRODUCTS ── -->
+      <div class="product-shelf">
+
+        <!-- Dandelion Jelly -->
+        <article class="product-card" aria-label="Dandelion Jelly">
+          <div class="product-card__art product-card__art--dandelion" aria-hidden="true">
+            <svg class="jar-icon" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="22" y="18" width="36" height="68" rx="8" fill="#f5e96e" fill-opacity=".85" stroke="#b59a1a" stroke-width="2"/>
+              <rect x="18" y="10" width="44" height="12" rx="4" fill="#e8d84a" stroke="#b59a1a" stroke-width="1.5"/>
+              <rect x="26" y="30" width="28" height="18" rx="3" fill="#fff" fill-opacity=".6" stroke="#b59a1a" stroke-width="1"/>
+              <text x="40" y="43" text-anchor="middle" font-size="7" fill="#5a4200" font-family="serif" font-weight="bold">DANDELION</text>
+              <path d="M40 60 Q34 54 38 50 Q42 46 40 54 Q38 46 42 50 Q46 54 40 60z" fill="#e8d000" stroke="#b59a1a" stroke-width=".5"/>
+              <path d="M40 60 Q44 52 48 56 Q52 60 44 62 Q52 58 50 64 Q46 68 40 60z" fill="#e8d000" stroke="#b59a1a" stroke-width=".5"/>
+              <path d="M40 60 Q36 52 32 56 Q28 60 36 62 Q28 58 30 64 Q34 68 40 60z" fill="#e8d000" stroke="#b59a1a" stroke-width=".5"/>
+              <circle cx="40" cy="60" r="4" fill="#f7c948"/>
+            </svg>
+          </div>
+          <div class="product-card__body">
+            <h3>Dandelion Jelly</h3>
+            <p>Bright, floral, and surprisingly sweet. Crafted from hand-harvested dandelion blossoms. A Lincoln County original.</p>
+            <div class="product-card__sizes">
+              <div class="size-option">
+                <span class="size-label">4 oz can</span>
+                <span class="size-price">$14.00</span>
+              </div>
+              <div class="size-option">
+                <span class="size-label">8 oz can</span>
+                <span class="size-price">$20.00</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Blackberry Jelly -->
+        <article class="product-card" aria-label="Blackberry Jelly">
+          <div class="product-card__art product-card__art--blackberry" aria-hidden="true">
+            <svg class="jar-icon" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="22" y="18" width="36" height="68" rx="8" fill="#4a1a6e" fill-opacity=".85" stroke="#2d0d45" stroke-width="2"/>
+              <rect x="18" y="10" width="44" height="12" rx="4" fill="#3d1660" stroke="#2d0d45" stroke-width="1.5"/>
+              <rect x="26" y="30" width="28" height="18" rx="3" fill="#fff" fill-opacity=".6" stroke="#2d0d45" stroke-width="1"/>
+              <text x="40" y="43" text-anchor="middle" font-size="7" fill="#1a0030" font-family="serif" font-weight="bold">BLACKBERRY</text>
+              <circle cx="36" cy="64" r="4" fill="#1a0030"/>
+              <circle cx="36" cy="64" r="2" fill="#3d1660" fill-opacity=".6"/>
+              <circle cx="44" cy="60" r="4" fill="#1a0030"/>
+              <circle cx="44" cy="60" r="2" fill="#3d1660" fill-opacity=".6"/>
+              <circle cx="40" cy="70" r="4" fill="#1a0030"/>
+              <circle cx="40" cy="70" r="2" fill="#3d1660" fill-opacity=".6"/>
+              <circle cx="33" cy="70" r="3" fill="#1a0030"/>
+              <circle cx="47" cy="68" r="3" fill="#1a0030"/>
+            </svg>
+          </div>
+          <div class="product-card__body">
+            <h3>Blackberry Jelly</h3>
+            <p>Deep, rich, and full of mountain flavor. Made from freshly picked blackberries at peak season. No pectin shortcuts.</p>
+            <div class="product-card__sizes">
+              <div class="size-option">
+                <span class="size-label">4 oz can</span>
+                <span class="size-price">$14.00</span>
+              </div>
+              <div class="size-option">
+                <span class="size-label">8 oz can</span>
+                <span class="size-price">$20.00</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div><!-- /.product-shelf -->
+
+      <!-- ── LIMITED TIME SECTION ── -->
+      <div class="limited-header" role="note">
+        <div class="limited-header__rule" aria-hidden="true"></div>
+        <div class="limited-header__badge">
+          <svg viewBox="0 0 16 16" fill="none" width="14" height="14" aria-hidden="true">
+            <path d="M8 1l1.8 3.6L14 5.3l-3 2.9.7 4.1L8 10.4l-3.7 1.9.7-4.1-3-2.9 4.2-.7z" fill="currentColor"/>
+          </svg>
+          Limited Time
+        </div>
+        <div class="limited-header__rule" aria-hidden="true"></div>
+      </div>
+
+      <!-- Prickly Pear Jelly — limited -->
+      <div class="product-shelf product-shelf--featured">
+
+        <article class="product-card product-card--featured" aria-label="Prickly Pear Jelly — Limited Time">
+          <div class="product-card__art product-card__art--pricklypear" aria-hidden="true">
+            <svg class="jar-icon" viewBox="0 0 80 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="22" y="18" width="36" height="68" rx="8" fill="#e0407a" fill-opacity=".85" stroke="#9c1a4a" stroke-width="2"/>
+              <rect x="18" y="10" width="44" height="12" rx="4" fill="#c4305e" stroke="#9c1a4a" stroke-width="1.5"/>
+              <rect x="26" y="30" width="28" height="18" rx="3" fill="#fff" fill-opacity=".6" stroke="#9c1a4a" stroke-width="1"/>
+              <text x="40" y="38" text-anchor="middle" font-size="6" fill="#5a0020" font-family="serif" font-weight="bold">PRICKLY</text>
+              <text x="40" y="46" text-anchor="middle" font-size="6" fill="#5a0020" font-family="serif" font-weight="bold">PEAR</text>
+              <!-- Cactus pad shapes -->
+              <ellipse cx="36" cy="68" rx="6" ry="9" fill="#c8e0a0" stroke="#7a9a50" stroke-width="1" transform="rotate(-15 36 68)"/>
+              <ellipse cx="46" cy="65" rx="5" ry="8" fill="#c8e0a0" stroke="#7a9a50" stroke-width="1" transform="rotate(15 46 65)"/>
+              <ellipse cx="40" cy="60" rx="5" ry="7" fill="#d8eeaa" stroke="#7a9a50" stroke-width="1"/>
+              <!-- Prickly pear fruit -->
+              <ellipse cx="38" cy="58" rx="4" ry="5" fill="#e0407a" stroke="#9c1a4a" stroke-width="1"/>
+              <ellipse cx="45" cy="60" rx="3" ry="4" fill="#e8508a" stroke="#9c1a4a" stroke-width="1"/>
+            </svg>
+          </div>
+          <div class="product-card__body">
+            <div class="product-card__limited-tag" aria-label="Limited time offering">
+              <svg viewBox="0 0 12 12" fill="none" width="11" height="11" aria-hidden="true">
+                <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M6 3v3l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              </svg>
+              Available while supplies last
+            </div>
+            <h3>Prickly Pear Jelly</h3>
+            <p>
+              Vivid magenta color and a uniquely sweet, watermelon-adjacent flavor.
+              Made in small batches from hand-harvested prickly pear fruit.
+              A genuine rarity — once it's gone, it's gone.
+            </p>
+            <div class="product-card__sizes">
+              <div class="size-option size-option--featured">
+                <span class="size-label">4 oz can</span>
+                <span class="size-price">$20.00</span>
+              </div>
+              <div class="size-option size-option--featured">
+                <span class="size-label">8 oz can</span>
+                <span class="size-price">$32.00</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div><!-- /.product-shelf--featured -->
+
+      <!-- Bottom shipping reminder -->
+      <p class="products__shipping-note">
+        All products ship <strong>flat-rate USPS</strong>. Local pickup is available at a reduced rate &mdash;
+        select &ldquo;Local Pickup&rdquo; in the order form and we will confirm pricing by return email.
+      </p>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       PRE-ORDER FORM
+       Formspree endpoint: xgoppawj
+       Vanilla JS fetch handler in main.js
+  ====================================================== -->
+  <section class="section order" id="order">
+    <div class="container order__grid">
+
+      <div class="order__intro">
+        <p class="section__label">Pre-Order</p>
+        <h2>Place Your Order</h2>
+        <p>
+          Select your items below and submit by Friday at 5 PM.
+          We will confirm availability and total by return email the same day.
+        </p>
+        <ul class="order__details" role="list">
+          <li>Confirmation sent by Friday 5 PM</li>
+          <li>Ships flat-rate USPS &mdash; one rate, any quantity</li>
+          <li>Local pickup available at reduced rate &mdash; select below</li>
+          <li>No payment collected online &mdash; invoiced after confirmation</li>
+        </ul>
+        <div class="order__price-ref" aria-label="Quick price reference">
+          <p class="order__price-ref__heading">Quick Reference</p>
+          <table class="price-ref-table" aria-label="Product pricing">
+            <thead>
+              <tr>
+                <th scope="col">Product</th>
+                <th scope="col">4 oz</th>
+                <th scope="col">8 oz</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Dandelion Jelly</td>
+                <td>$14.00</td>
+                <td>$20.00</td>
+              </tr>
+              <tr>
+                <td>Blackberry Jelly</td>
+                <td>$14.00</td>
+                <td>$20.00</td>
+              </tr>
+              <tr class="price-ref-table__limited">
+                <td>
+                  Prickly Pear Jelly
+                  <span class="price-ref-table__tag">Limited</span>
+                </td>
+                <td>$20.00</td>
+                <td>$32.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <form
+        class="order-form"
+        id="orderForm"
+        action="https://formspree.io/f/xgoppawj"
+        method="POST"
+        novalidate
+        aria-label="Pre-order form"
+      >
+        <!-- Formspree: sets subject line on incoming email -->
+        <input type="hidden" name="_subject" value="New Order — Not Your Grandma's Cellar" />
+        <!-- Honeypot: bots fill this; Formspree silently discards those submissions -->
+        <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none" />
+
+        <!-- Row 1: name + email -->
+        <div class="field">
+          <label for="f-name">Full Name <span class="field__req" aria-hidden="true">*</span></label>
+          <input type="text" id="f-name" name="name" placeholder="Jane Smith" autocomplete="name" required aria-required="true" />
+          <span class="field__error" aria-live="polite"></span>
+        </div>
+
+        <div class="field">
+          <label for="f-email">Email Address <span class="field__req" aria-hidden="true">*</span></label>
+          <input type="email" id="f-email" name="_replyto" placeholder="jane@example.com" autocomplete="email" required aria-required="true" />
+          <span class="field__error" aria-live="polite"></span>
+        </div>
+
+        <!-- Row 2: phone + fulfillment method -->
+        <div class="field">
+          <label for="f-phone">Phone <span class="field__opt">(optional)</span></label>
+          <input type="tel" id="f-phone" name="phone" placeholder="(304) 555-0100" autocomplete="tel" />
+        </div>
+
+        <div class="field">
+          <label for="f-fulfillment">Fulfillment <span class="field__req" aria-hidden="true">*</span></label>
+          <select id="f-fulfillment" name="fulfillment" required aria-required="true">
+            <option value="">— Select one —</option>
+            <option value="Ship — Flat-rate USPS">Ship &mdash; Flat-rate USPS</option>
+            <option value="Local Pickup (pricing TBD)">Local Pickup (pricing to be confirmed)</option>
+          </select>
+          <span class="field__error" aria-live="polite"></span>
+        </div>
+
+        <!-- Order items — full width -->
+        <div class="field field--full">
+          <label for="f-order">
+            Items &amp; Quantities <span class="field__req" aria-hidden="true">*</span>
+          </label>
+          <!--
+            Placeholder lists actual products and sizes.
+          -->
+          <textarea
+            id="f-order"
+            name="order_details"
+            rows="6"
+            placeholder="List each item and size. Examples:
+2 x Dandelion Jelly — 4 oz ($14 ea)
+1 x Blackberry Jelly — 8 oz ($20)
+1 x Prickly Pear Jelly — 4 oz ($20) [limited]"
+            required aria-required="true"
+          ></textarea>
+          <span class="field__error" aria-live="polite"></span>
+        </div>
+
+        <!-- Shipping address — shown when USPS selected, hidden when pickup -->
+        <div class="field field--full" id="addressBlock">
+          <label for="f-address">Shipping Address <span class="field__req" aria-hidden="true">*</span></label>
+          <input
+            type="text"
+            id="f-address"
+            name="shipping_address"
+            placeholder="Street address, City, State, ZIP"
+            autocomplete="street-address"
+          />
+          <span class="field__error" aria-live="polite"></span>
+        </div>
+
+        <!-- Notes -->
+        <div class="field field--full">
+          <label for="f-notes">Additional Notes <span class="field__opt">(optional)</span></label>
+          <textarea
+            id="f-notes"
+            name="notes"
+            rows="3"
+            placeholder="Gift wrap, dietary notes, questions about local pickup pricing..."
+          ></textarea>
+        </div>
+
+        <!-- Submit -->
+        <div class="field field--full form__actions">
+          <button type="submit" class="btn btn--primary btn--lg" id="submitBtn">
+            <span class="btn__label">Submit Order</span>
+            <span class="btn__spinner" aria-hidden="true" hidden></span>
+          </button>
+          <p class="form__note">
+            Orders close Fridays at 5 PM. You will receive a confirmation email
+            with your total before any payment is arranged.
+          </p>
+        </div>
+
+        <!-- State banners — toggled by main.js -->
+        <div class="form__banner form__banner--success" id="formSuccess" role="alert" aria-live="assertive" hidden>
+          <strong>Order received.</strong>
+          <p>We will reply to your email by Friday with availability and your total. Thank you for supporting a local small business.</p>
+        </div>
+        <div class="form__banner form__banner--error" id="formError" role="alert" aria-live="assertive" hidden>
+          <strong>Submission failed.</strong>
+          <p>Please try again or contact us directly at <a href="mailto:orders@notyourgrandmascellar.com">orders@notyourgrandmascellar.com</a>.</p>
+        </div>
+
+      </form>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       CONTACT
+  ====================================================== -->
+  <section class="section contact" id="contact">
+    <div class="container contact__grid">
+
+      <div class="contact__info">
+        <p class="section__label">Find Us</p>
+        <h2>Hours &amp; Location</h2>
+        <table class="hours-table" aria-label="Market hours">
+          <tbody>
+            <tr>
+              <th scope="row">Saturday</th>
+              <td>7:00 AM &ndash; 1:00 PM</td>
+            </tr>
+            <tr>
+              <th scope="row">Sunday</th>
+              <td>8:00 AM &ndash; 12:00 PM</td>
+            </tr>
+            <tr class="hours-table__closed">
+              <th scope="row">Mon &ndash; Fri</th>
+              <td>Closed</td>
+            </tr>
+          </tbody>
+        </table>
+        <address class="contact__address">
+          <strong>Lincoln County Farmers Market</strong><br />
+          Lincoln County, West Virginia<br />
+          <a href="mailto:orders@notyourgrandmascellar.com">orders@notyourgrandmascellar.com</a>
+        </address>
+      </div>
+
+      <div class="contact__map">
+        <!--
+          Replace this stub with your Google Maps embed:
+          Maps → search address → Share → Embed a map → copy iframe src
+
+          <iframe
+            src="https://www.google.com/maps/embed?pb=..."
+            width="100%" height="360" style="border:0"
+            allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Lincoln County Farmers Market location">
+          </iframe>
+        -->
+        <div class="map-stub" role="img" aria-label="Map placeholder — replace with Google Maps iframe">
+          <p>Map Embed</p>
+          <small>Replace .map-stub with Google Maps &lt;iframe&gt;</small>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ======================================================
+       FOOTER
+  ====================================================== -->
+  <footer class="site-footer">
+    <div class="container footer__inner">
+
+      <div class="footer__brand">
+        <img
+          src="assets/logo-badge.jpg"
+          alt=""
+          aria-hidden="true"
+          class="footer__logo"
+          width="56" height="56"
+          loading="lazy"
+        />
+        <div>
+          <p class="footer__name">Not Your Grandma's Cellar, LLC</p>
+          <p class="footer__sub">Canning &amp; Farm Fresh Produce &mdash; Lincoln County, WV</p>
+        </div>
+      </div>
+
+      <nav class="footer__nav" aria-label="Footer navigation">
+        <a href="#about">About</a>
+        <a href="#products">Shop</a>
+        <a href="#order">Order</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <p class="footer__copy">
+        &copy; <span id="year"></span> Not Your Grandma's Cellar, LLC. All rights reserved.
+      </p>
+
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+
+</body>
+</html>
